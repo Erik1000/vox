@@ -92,7 +92,7 @@ enum ConnectAddress {
     Tcp(String),
     #[cfg(feature = "transport-local")]
     Local(String),
-    #[cfg(all(feature = "transport-websocket", not(target_arch = "wasm32")))]
+    #[cfg(all(feature = "transport-websocket"))]
     Ws(String),
 }
 
@@ -113,7 +113,7 @@ fn parse_connect_address(addr: String) -> Result<ConnectAddress, SessionError> {
         "tcp" => Ok(ConnectAddress::Tcp(host)),
         #[cfg(feature = "transport-local")]
         "local" => Ok(ConnectAddress::Local(host)),
-        #[cfg(all(feature = "transport-websocket", not(target_arch = "wasm32")))]
+        #[cfg(all(feature = "transport-websocket"))]
         "ws" | "wss" => Ok(ConnectAddress::Ws(format!("{scheme}://{host}"))),
         _ => Err(SessionError::Protocol(format!(
             "unknown transport scheme: {scheme:?}"
@@ -414,7 +414,7 @@ where
             // Native-only: `ws_link_source` is the tokio-tungstenite reconnect
             // source. Wasm clients use the lower-level vox_websocket::WsLink
             // (web_sys::WebSocket) directly.
-            #[cfg(all(feature = "transport-websocket", not(target_arch = "wasm32")))]
+            #[cfg(all(feature = "transport-websocket"))]
             ConnectAddress::Ws(url) => {
                 tracing::trace!(
                     service = Client::SERVICE_NAME,
@@ -568,7 +568,7 @@ where
             }
             #[cfg(feature = "transport-local")]
             "local" => local::serve_local(&host, acceptor, channel_capacity, observer).await,
-            #[cfg(all(feature = "transport-websocket", not(target_arch = "wasm32")))]
+            #[cfg(all(feature = "transport-websocket"))]
             "ws" => {
                 let listener = WsListener::bind(&host).await?;
                 let mut builder =
